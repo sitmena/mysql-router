@@ -1,7 +1,8 @@
 ## Configuration
 
- - change x.x.x.x, y.y.y.y and z.z.z.z to DBs IPs on the host file before buiding the docker image or on the k8s yaml deployment 
- - change primary dbs credentials on the yaml 
+ - change x.x.x.x, y.y.y.y and z.z.z.z to DB IPs on the hosts file before buiding the docker image or on the k8s yaml deployment 
+ - also hostnames on hosts and yaml must be identical to the real hostname on the db servers 
+ - change primary dbs credentials on the yaml
 
 ## To run as docker 
 
