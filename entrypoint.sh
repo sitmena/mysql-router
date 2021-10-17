@@ -12,5 +12,8 @@ else
   sudo ROUTER_PID=$basedir/mysqlrouter.pid /usr/bin/mysqlrouter -c $basedir/mysqlrouter.conf --user=root 
 fi
 
+# Applying MySQL router custom configuration
+cp /tmp/mysqlrouter.conf $basedir/mysqlrouter.conf
 
+$basedir/stop.sh && $basedir/start.sh
 
