@@ -10,12 +10,12 @@ spec:
   type: ClusterIP
   ports:
   - name: readwrite
-    port: $ROUTER_RW_PORT
-    targetPort: $ROUTER_RW_PORT
+    port: 6446
+    targetPort: 6446
     protocol: TCP
   - name: readonly
-    port: $ROUTER_RO_PORT
-    targetPort: $ROUTER_RO_PORT
+    port: 6447
+    targetPort: 6447
     protocol: TCP
 ---
 apiVersion: apps/v1
@@ -49,9 +49,9 @@ spec:
       - name: app-mysql-router
         image: sitmenadev/mysql-router:1.0
         ports:
-        - containerPort: $ROUTER_RW_PORT
+        - containerPort: 6446
           name: readwrite
-        - containerPort: $ROUTER_RO_PORT
+        - containerPort: 6447
           name: readonly
         env:
           - name: CLUSTER_ADMIN
