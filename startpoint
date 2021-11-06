@@ -1,0 +1,40 @@
+#! /bin/bash
+
+# Modify the values as needed
+
+# Connection params
+## Server/VM public IO
+remoteHost=3.144.235.92
+## Login username
+hostUser=ubuntu
+## Private key used to access the server/VM
+privateKey=~/.ssh/test-kh.pem
+
+# Router params
+## Directory where volumes will be stored
+baseDir=/home/$hostUser
+## Directory where the router project will be copied to
+projectDir=$baseDir/mysql-router
+## Environment name of the MySQL cluster (Dev, QA, Prod...etc.)
+environmentName=prod
+## The name of the volume directory to create
+volumeNames=web-app-vol
+
+# Docker params
+## Docker name of the image to be created
+dockerImageName=prod_router
+## Docker tage of the image to be created
+dockerImageTag=1.0
+
+# Run the main script with the provided values
+
+./readiness $remoteHost \
+    $hostUser \
+    $privateKey \
+    $baseDir \
+    $projectDir \
+    $environmentName \
+    $volumeNames \
+    $dockerImageName \
+    $dockerImageTag
+

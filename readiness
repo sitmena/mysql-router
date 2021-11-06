@@ -1,0 +1,77 @@
+#! /bin/bash
+
+# Connection params
+host=$1
+user=$2
+key=$3
+
+# Router params
+baseDir=$4
+prjDir=$5
+env=$6
+volume=$7
+
+# Docker params
+imgName=$8
+imgTag=$9
+
+# Start execution
+ssh -o StrictHostKeyChecking=no -i $key $user@$host <<EOF
+
+    # In case any issue happened and the code was run more than once
+    sudo rm -f /etc/apt/sources.list.d/docker.list
+
+    sudo apt-get -y autoclean
+    sudo apt-get -y autoremove
+
+    sudo apt-get -y update
+    sudo apt-get -y upgrade
+    sudo apt-get -y install unzip curl software-properties-common ca-certificates
+    sudo apt-get --with-new-pkgs -y upgrade
+
+    curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo gpg --dearmor -o /usr/share/keyrings/docker-archive-keyring.gpg
+    echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/docker-archive-keyring.gpg] https://download.docker.com/linux/ubuntu \
+        $(lsb_release -cs) stable" |
+        sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
+    sudo apt-get -y update
+    sudo apt-get -y install docker-ce docker-ce-cli containerd.io
+
+    sudo mkdir -p /etc/systemd/system/docker.service.d
+
+    sudo usermod -a -G docker \$USER
+
+    sudo systemctl daemon-reload
+    sudo systemctl restart docker
+    sudo systemctl enable docker
+EOF
+
+# Send the zipped project to the remote server
+zip -r mysql-router.zip ./ &&
+ssh -o StrictHostKeyChecking=no -i $key $user@$host <<EOF
+    mkdir -p $baseDir
+    mkdir -p $prjDir
+EOF
+
+# Unzip the project
+scp -o StrictHostKeyChecking=no -i $key mysql-router.zip $user@$host:$prjDir &&
+ssh -o StrictHostKeyChecking=no -i $key $user@$host <<EOF
+    cd $prjDir
+    echo "A" | unzip mysql-router.zip
+EOF
+ssh -o StrictHostKeyChecking=no -i $key $user@$host <<EOF
+    mkdir -p $baseDir/router
+    mkdir -p $baseDir/router/$env
+    mkdir -p $baseDir/router/$env/$volume
+EOF
+
+# Build docker images
+ssh -o StrictHostKeyChecking=no -i $key $user@$host << EOF
+    cd $prjDir
+    docker build -t $imgName:$imgTag .
+EOF
+
+# Run docker containers
+ssh -i $key $user@$host << EOF
+    cd $prjDir
+    sh dockerrun.sh
+EOF
